@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>@marianmeres/kitt — examples</title>
+		<style>
+			:root {
+				--bg: #0b0b0e;
+				--panel: #141418;
+				--border: #26262c;
+				--fg: #d7d7dc;
+				--muted: #7a7a83;
+				--accent: #fc4a50;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			body {
+				margin: 0;
+				padding: 2rem clamp(1rem, 4vw, 3rem);
+				background: var(--bg);
+				color: var(--fg);
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+					"Liberation Mono", "Courier New", monospace;
+				font-size: 15px;
+				line-height: 1.5;
+			}
+			h1 {
+				font-size: 1.25rem;
+				font-weight: 500;
+				margin: 0 0 0.25rem 0;
+			}
+			h1 small {
+				color: var(--muted);
+				font-weight: 400;
+				font-size: 0.85rem;
+			}
+			.intro {
+				color: var(--muted);
+				margin: 0 0 2rem 0;
+				max-width: 68ch;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+				gap: 1.25rem;
+			}
+			.demo {
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: 8px;
+				padding: 1.25rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+			}
+			.demo h2 {
+				font-size: 0.9rem;
+				font-weight: 500;
+				margin: 0;
+				color: var(--fg);
+			}
+			.demo .hint {
+				color: var(--muted);
+				font-size: 0.8rem;
+				margin: 0;
+			}
+			.stage {
+				min-height: 80px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				padding: 1rem;
+				background: #000;
+				border-radius: 4px;
+				overflow: hidden;
+			}
+			.controls {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			button {
+				background: transparent;
+				color: var(--fg);
+				border: 1px solid var(--border);
+				border-radius: 4px;
+				padding: 0.35rem 0.75rem;
+				font-family: inherit;
+				font-size: 0.8rem;
+				cursor: pointer;
+				transition: border-color 0.15s, color 0.15s;
+			}
+			button:hover {
+				border-color: var(--accent);
+				color: var(--accent);
+			}
+
+			/* 1) text spans */
+			.word {
+				font-size: 2.5rem;
+				font-weight: 700;
+				letter-spacing: 0.05em;
+				color: #333;
+			}
+			.word span {
+				display: inline-block;
+				color: inherit;
+			}
+
+			/* 2) svg */
+			.logo {
+				width: 100%;
+				max-width: 300px;
+				color: #2a2a30;
+			}
+
+			/* 3) boxes */
+			.boxes {
+				display: flex;
+				gap: 6px;
+			}
+			.boxes .cell {
+				width: 26px;
+				height: 26px;
+				border-radius: 3px;
+				background: #222;
+			}
+
+			/* 4) opacity */
+			.dots {
+				display: flex;
+				gap: 10px;
+			}
+			.dots .dot {
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background: var(--accent);
+				opacity: 0.1;
+			}
+
+			/* 5) vertical bars for equalizer style */
+			.bars {
+				display: flex;
+				gap: 4px;
+				align-items: flex-end;
+				height: 60px;
+			}
+			.bars .bar {
+				width: 8px;
+				height: 60px;
+				background: #222;
+				border-radius: 2px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>@marianmeres/kitt <small>— Knight Rider scanner, generalized</small></h1>
+		<p class="intro">
+			A tiny factory that animates a bright head with a trailing gradient across
+			any set of DOM elements. Every property below (selector, CSS property,
+			colors, direction, triggers, schedule, cycles) is configurable.
+		</p>
+
+		<div class="grid">
+			<!-- 1. basic: text spans, color property, pingpong once -->
+			<div class="demo">
+				<h2>1. Basic — color on text spans</h2>
+				<p class="hint">
+					Default config: <code>property: "color"</code>, pingpong once.
+				</p>
+				<div class="stage">
+					<div class="word" id="word-basic">
+						<span>K</span><span>N</span><span>I</span><span>G</span
+						><span>H</span><span>T</span>&nbsp;<span>R</span><span>I</span
+						><span>D</span><span>E</span><span>R</span>
+					</div>
+				</div>
+				<div class="controls">
+					<button data-play="basic">Play</button>
+					<button data-stop="basic">Stop</button>
+				</div>
+			</div>
+
+			<!-- 2. svg fill with hover + schedule (bravoecho flavor) -->
+			<div class="demo">
+				<h2>2. SVG fill — hover + auto-schedule</h2>
+				<p class="hint">
+					Hover the logo to play. Also auto-plays every 4–7 s.
+					<code>property: "fill"</code>.
+				</p>
+				<div class="stage">
+					<svg
+						id="svg-logo"
+						class="logo"
+						viewBox="0 0 192 40"
+						fill="currentColor"
+					>
+						<rect x="0" y="10" width="18" height="20" rx="2" />
+						<rect x="24" y="10" width="18" height="20" rx="2" />
+						<rect x="48" y="10" width="18" height="20" rx="2" />
+						<rect x="72" y="10" width="18" height="20" rx="2" />
+						<rect x="96" y="10" width="18" height="20" rx="2" />
+						<rect x="120" y="10" width="18" height="20" rx="2" />
+						<rect x="144" y="10" width="18" height="20" rx="2" />
+						<rect x="168" y="10" width="18" height="20" rx="2" />
+					</svg>
+				</div>
+				<div class="controls">
+					<button data-play="svg">Play</button>
+					<button data-stop="svg">Stop</button>
+				</div>
+			</div>
+
+			<!-- 3. background color, custom cyan trail, ltr only -->
+			<div class="demo">
+				<h2>3. Background — cyan trail, LTR only</h2>
+				<p class="hint">
+					<code>property: "backgroundColor"</code>,
+					<code>direction: "ltr"</code>, custom trail colors.
+				</p>
+				<div class="stage">
+					<div class="boxes" id="boxes-cyan">
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+						<div class="cell"></div>
+					</div>
+				</div>
+				<div class="controls">
+					<button data-play="cyan">Play</button>
+					<button data-stop="cyan">Stop</button>
+				</div>
+			</div>
+
+			<!-- 4. opacity pulse, pingpong, infinite cycles -->
+			<div class="demo">
+				<h2>4. Opacity — infinite loop</h2>
+				<p class="hint">
+					<code>property: "opacity"</code>, numeric trail values,
+					<code>cycles: Infinity</code>.
+				</p>
+				<div class="stage">
+					<div class="dots" id="dots">
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+						<div class="dot"></div>
+					</div>
+				</div>
+				<div class="controls">
+					<button data-play="dots">Start loop</button>
+					<button data-stop="dots">Stop loop</button>
+				</div>
+			</div>
+
+			<!-- 5. backgroundColor, RTL direction, 3 cycles, slower interval -->
+			<div class="demo">
+				<h2>5. Equalizer bars — RTL, 3 cycles</h2>
+				<p class="hint">
+					<code>direction: "rtl"</code>, <code>cycles: 3</code>,
+					<code>interval: 40</code>, green trail.
+				</p>
+				<div class="stage">
+					<div class="bars" id="bars">
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+						<div class="bar"></div>
+					</div>
+				</div>
+				<div class="controls">
+					<button data-play="bars">Play</button>
+					<button data-stop="bars">Stop</button>
+				</div>
+			</div>
+
+			<!-- 6. click trigger + onTick callback -->
+			<div class="demo">
+				<h2>6. Click trigger + onTick callback</h2>
+				<p class="hint">
+					Click the word to play. Current head index is shown below.
+				</p>
+				<div class="stage">
+					<div class="word" id="word-click" style="cursor: pointer">
+						<span>C</span><span>L</span><span>I</span><span>C</span
+						><span>K</span>&nbsp;<span>M</span><span>E</span>
+					</div>
+				</div>
+				<div class="controls">
+					<span
+						id="click-readout"
+						style="color: var(--muted); font-size: 0.8rem"
+						>head: —</span
+					>
+				</div>
+			</div>
+		</div>
+
+		<script type="module">
+			import { kitt } from "./dist/bundle.js";
+
+			const instances = {};
+
+			// 1. Basic
+			instances.basic = kitt({
+				target: "#word-basic",
+				itemSelector: "span",
+			});
+
+			// 2. SVG with hover + schedule
+			instances.svg = kitt({
+				target: "#svg-logo",
+				itemSelector: "rect",
+				property: "fill",
+				baseValue: "currentColor",
+				triggers: ["hover"],
+				schedule: {
+					initialDelay: 1500,
+					interval: [4000, 7000],
+					repeat: true,
+				},
+			});
+
+			// 3. Cyan LTR
+			instances.cyan = kitt({
+				target: "#boxes-cyan",
+				itemSelector: ".cell",
+				property: "backgroundColor",
+				baseValue: "#222",
+				direction: "ltr",
+				trail: [
+					"rgb(0, 255, 255)",
+					"rgb(0, 204, 204)",
+					"rgb(0, 153, 153)",
+					"rgb(0, 102, 102)",
+					"rgb(0, 51, 51)",
+				],
+			});
+
+			// 4. Opacity infinite loop
+			instances.dots = kitt({
+				target: "#dots",
+				itemSelector: ".dot",
+				property: "opacity",
+				baseValue: "0.1",
+				trail: ["1", "0.8", "0.6", "0.4", "0.2"],
+				cycles: Infinity,
+				interval: 90,
+			});
+
+			// 5. RTL equalizer, 3 cycles
+			instances.bars = kitt({
+				target: "#bars",
+				itemSelector: ".bar",
+				property: "backgroundColor",
+				baseValue: "#222",
+				direction: "rtl",
+				cycles: 3,
+				interval: 40,
+				trail: [
+					"rgb(80, 255, 140)",
+					"rgb(64, 204, 112)",
+					"rgb(48, 153, 84)",
+					"rgb(32, 102, 56)",
+					"rgb(16, 51, 28)",
+				],
+			});
+
+			// 6. Click trigger + onTick
+			const readout = document.getElementById("click-readout");
+			instances.click = kitt({
+				target: "#word-click",
+				itemSelector: "span",
+				triggers: ["click"],
+				trail: [
+					"rgb(255, 220, 0)",
+					"rgb(204, 176, 0)",
+					"rgb(153, 132, 0)",
+					"rgb(102, 88, 0)",
+					"rgb(51, 44, 0)",
+				],
+				onTick: (idx, phase) => {
+					readout.textContent = `head: ${idx} (${phase})`;
+				},
+				onEnd: () => {
+					readout.textContent = "head: —";
+				},
+			});
+
+			// Wire Play/Stop buttons
+			for (const btn of document.querySelectorAll("[data-play]")) {
+				btn.addEventListener("click", () => instances[btn.dataset.play]?.play());
+			}
+			for (const btn of document.querySelectorAll("[data-stop]")) {
+				btn.addEventListener("click", () => instances[btn.dataset.stop]?.stop());
+			}
+		</script>
+	</body>
+</html>
