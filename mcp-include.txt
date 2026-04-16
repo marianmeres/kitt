@@ -1,0 +1,4 @@
+Knight Rider-style scanner animation factory for DOM elements. Sweeps a configurable CSS
+property (color, backgroundColor, opacity, fill, custom properties) across any element
+collection with a trailing gradient head, supporting ltr/rtl/pingpong direction, cycle
+counts, auto-replay schedules, hover/click/visible triggers, and prefers-reduced-motion.
