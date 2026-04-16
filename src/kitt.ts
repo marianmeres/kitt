@@ -82,9 +82,7 @@ export interface KittHandle {
 
 const DEFAULT_TRAIL: string[] = [
 	"rgb(255, 0, 0)",
-	"rgb(204, 0, 0)",
 	"rgb(153, 0, 0)",
-	"rgb(102, 0, 0)",
 	"rgb(51, 0, 0)",
 ];
 
@@ -112,14 +110,18 @@ function resolveElements(
 		if (itemSelector) {
 			const root = doc.querySelector(target);
 			return root
-				? (Array.from(root.querySelectorAll(itemSelector)) as HTMLElement[])
+				? (Array.from(
+						root.querySelectorAll(itemSelector),
+					) as HTMLElement[])
 				: [];
 		}
 		return Array.from(doc.querySelectorAll(target)) as HTMLElement[];
 	}
 	if (isElement(target)) {
 		if (itemSelector) {
-			return Array.from(target.querySelectorAll(itemSelector)) as HTMLElement[];
+			return Array.from(
+				target.querySelectorAll(itemSelector),
+			) as HTMLElement[];
 		}
 		return Array.from(target.children) as HTMLElement[];
 	}
@@ -134,8 +136,9 @@ function randomInt(min: number, max: number): number {
 
 function prefersReducedMotion(): boolean {
 	if (typeof globalThis === "undefined") return false;
-	const mm = (globalThis as { matchMedia?: (q: string) => { matches: boolean } })
-		.matchMedia;
+	const mm = (
+		globalThis as { matchMedia?: (q: string) => { matches: boolean } }
+	).matchMedia;
 	if (typeof mm !== "function") return false;
 	return mm("(prefers-reduced-motion: reduce)").matches;
 }
@@ -177,9 +180,11 @@ function buildOneWay(length: number, tailLength: number, dir: number): Frame[] {
 	// Single sweep with slide-in and slide-off, used for ltr/rtl directions.
 	const seq: Frame[] = [];
 	if (dir === -1) {
-		for (let i = -tailLength; i < length + tailLength; i++) seq.push([i, dir]);
+		for (let i = -tailLength; i < length + tailLength; i++)
+			seq.push([i, dir]);
 	} else {
-		for (let i = length - 1 + tailLength; i >= -tailLength; i--) seq.push([i, dir]);
+		for (let i = length - 1 + tailLength; i >= -tailLength; i--)
+			seq.push([i, dir]);
 	}
 	return seq;
 }
@@ -214,7 +219,8 @@ export function kitt(config: KittConfig): KittHandle {
 		onTick,
 	} = config;
 
-	if (!trail.length) throw new Error("kitt: `trail` must contain at least one value");
+	if (!trail.length)
+		throw new Error("kitt: `trail` must contain at least one value");
 
 	const tailLength = config.tailLength ?? Math.max(1, trail.length - 1);
 	const els = resolveElements(target, itemSelector);
@@ -234,7 +240,11 @@ export function kitt(config: KittConfig): KittHandle {
 		// Single-direction sweeps already include their own slide-in and slide-off,
 		// so the whole sweep IS the loop body. No separate intro/outro needed.
 		intro = [];
-		loopBody = buildOneWay(els.length, tailLength, direction === "ltr" ? -1 : 1);
+		loopBody = buildOneWay(
+			els.length,
+			tailLength,
+			direction === "ltr" ? -1 : 1,
+		);
 		outro = [];
 	}
 
@@ -360,7 +370,9 @@ export function kitt(config: KittConfig): KittHandle {
 			);
 		} else if (trig === "visible") {
 			const IO = (
-				globalThis as { IntersectionObserver?: typeof IntersectionObserver }
+				globalThis as {
+					IntersectionObserver?: typeof IntersectionObserver;
+				}
 			).IntersectionObserver;
 			if (!IO) continue;
 			const observer = new IO((entries) => {
