@@ -24,6 +24,12 @@ export interface KittScheduleConfig {
 	repeat?: boolean;
 }
 
+/**
+ * Configuration for {@link kitt}.
+ *
+ * Only `target` is required; every other field has a sensible default
+ * documented inline. See the field-level JSDoc for accepted values.
+ */
 export interface KittConfig {
 	/**
 	 * CSS selector, Element, NodeList, or array of elements.
@@ -67,6 +73,12 @@ export interface KittConfig {
 	onTick?: (headIndex: number, phase: "ltr" | "rtl") => void;
 }
 
+/**
+ * Imperative handle returned by {@link kitt}.
+ *
+ * Use to play, stop, toggle, query state, or fully tear down the scanner
+ * (cancelling timers and detaching trigger listeners).
+ */
 export interface KittHandle {
 	/** Start a run. No-op if already playing or reduced motion is active. */
 	play: () => void;
