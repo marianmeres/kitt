@@ -1,26 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>@marianmeres/kitt — examples</title>
+
+		<!--
+			Styling = the @marianmeres/design-tokens approach: theme.css holds the
+			semantic --app-color-* custom properties (light on :root, dark on
+			:root.dark), generated from example/src/theme.ts. Everything below
+			styles against those tokens — no hard-coded colors.
+			Regenerate with:  deno task example:theme
+		-->
+		<link rel="stylesheet" href="./theme.css" />
 		<style>
-			:root {
-				--bg: #0b0b0e;
-				--panel: #141418;
-				--border: #26262c;
-				--fg: #d7d7dc;
-				--muted: #7a7a83;
-				--accent: #fc4a50;
-			}
 			* {
 				box-sizing: border-box;
 			}
 			body {
 				margin: 0;
 				padding: 2rem clamp(1rem, 4vw, 3rem);
-				background: var(--bg);
-				color: var(--fg);
+				background: var(--app-color-background);
+				color: var(--app-color-foreground);
 				font-family:
 					ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 					"Liberation Mono", "Courier New", monospace;
@@ -28,7 +29,13 @@
 				line-height: 1.5;
 			}
 			a {
-				color: var(--fg);
+				color: var(--app-color-foreground);
+			}
+			.head {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 1rem;
 			}
 			h1 {
 				font-size: 1.25rem;
@@ -36,14 +43,21 @@
 				margin: 0 0 0.25rem 0;
 			}
 			h1 small {
-				color: var(--muted);
+				color: var(--app-color-muted-foreground);
 				font-weight: 400;
 				font-size: 0.85rem;
 			}
 			.intro {
-				color: var(--muted);
+				color: var(--app-color-muted-foreground);
 				margin: 0 0 2rem 0;
 				max-width: 68ch;
+			}
+			code {
+				background: var(--app-color-muted);
+				color: var(--app-color-foreground);
+				padding: 0.05em 0.35em;
+				border-radius: 3px;
+				font-size: 0.85em;
 			}
 			.grid {
 				display: grid;
@@ -51,8 +65,9 @@
 				gap: 1.25rem;
 			}
 			.demo {
-				background: var(--panel);
-				border: 1px solid var(--border);
+				background: var(--app-color-surface);
+				color: var(--app-color-surface-foreground);
+				border: 1px solid var(--app-color-border);
 				border-radius: 8px;
 				padding: 1.25rem;
 				display: flex;
@@ -63,10 +78,9 @@
 				font-size: 0.9rem;
 				font-weight: 500;
 				margin: 0;
-				color: var(--fg);
 			}
 			.demo .hint {
-				color: var(--muted);
+				color: var(--app-color-muted-foreground);
 				font-size: 0.8rem;
 				margin: 0;
 			}
@@ -76,7 +90,8 @@
 				align-items: center;
 				justify-content: center;
 				padding: 1rem;
-				background: #000;
+				background: var(--app-color-background);
+				border: 1px solid var(--app-color-border);
 				border-radius: 4px;
 				overflow: hidden;
 			}
@@ -84,11 +99,12 @@
 				display: flex;
 				gap: 0.5rem;
 				flex-wrap: wrap;
+				align-items: center;
 			}
 			button {
 				background: transparent;
-				color: var(--fg);
-				border: 1px solid var(--border);
+				color: var(--app-color-foreground);
+				border: 1px solid var(--app-color-border);
 				border-radius: 4px;
 				padding: 0.35rem 0.75rem;
 				font-family: inherit;
@@ -99,40 +115,46 @@
 					color 0.15s;
 			}
 			button:hover {
-				border-color: var(--accent);
-				color: var(--accent);
+				border-color: var(--app-color-primary);
+				color: var(--app-color-primary);
+			}
+			.readout {
+				color: var(--app-color-muted-foreground);
+				font-size: 0.8rem;
 			}
 
-			/* 1) text spans */
+			/* --- animated stage elements (off-state colors come from tokens) --- */
+
+			/* 1 & 6) text spans */
 			.word {
 				font-size: 2.5rem;
 				font-weight: 700;
 				letter-spacing: 0.05em;
-				color: #333;
+				color: var(--app-color-border); /* "off" letters */
 			}
 			.word span {
 				display: inline-block;
 				color: inherit;
 			}
 
-			/* 2) svg */
+			/* 2) svg fill — base fill is currentColor */
 			.logo {
 				width: 100%;
 				max-width: 300px;
-				color: #2a2a30;
+				color: var(--app-color-border);
 			}
 
-			/* 7) svg opacity */
+			/* 7) svg opacity — base fill is primary, opacity animates */
 			.wave {
 				width: 100%;
 				max-width: 300px;
 			}
 			.wave circle {
-				fill: var(--accent);
+				fill: var(--app-color-primary);
 				opacity: 0.1;
 			}
 
-			/* 3) boxes */
+			/* 3) boxes — backgroundColor track */
 			.boxes {
 				display: flex;
 				gap: 6px;
@@ -141,10 +163,10 @@
 				width: 26px;
 				height: 26px;
 				border-radius: 3px;
-				background: #222;
+				background: var(--app-color-muted);
 			}
 
-			/* 4) opacity */
+			/* 4) opacity dots */
 			.dots {
 				display: flex;
 				gap: 10px;
@@ -153,11 +175,11 @@
 				width: 14px;
 				height: 14px;
 				border-radius: 50%;
-				background: var(--accent);
+				background: var(--app-color-primary);
 				opacity: 0.1;
 			}
 
-			/* 5) vertical bars for equalizer style */
+			/* 5) equalizer bars — backgroundColor track */
 			.bars {
 				display: flex;
 				gap: 4px;
@@ -167,323 +189,158 @@
 			.bars .bar {
 				width: 8px;
 				height: 60px;
-				background: #222;
+				background: var(--app-color-muted);
 				border-radius: 2px;
 			}
 		</style>
 	</head>
 	<body>
-		<h1>
-			<a href="https://github.com/marianmeres/kitt">@marianmeres/kitt </a
-			><small>— Knight Rider scanner, generalized</small>
-		</h1>
-		<p class="intro">
-			A tiny factory that animates a bright head with a trailing gradient
-			across any set of DOM elements. Every property below (selector, CSS
-			property, colors, direction, triggers, schedule, cycles) is
-			configurable.
-		</p>
-
-		<div class="grid">
-			<!-- 1. basic: text spans, color property, pingpong once -->
-			<div class="demo">
-				<h2>1. Basic — color on text spans</h2>
-				<p class="hint">
-					Default config: <code>property: "color"</code>, pingpong
-					once.
-				</p>
-				<div class="stage">
-					<div class="word" id="word-basic">
-						<span>K</span><span>N</span><span>I</span><span>G</span
-						><span>H</span><span>T</span>&nbsp;<span>R</span
-						><span>I</span><span>D</span><span>E</span
-						><span>R</span>
-					</div>
-				</div>
-				<div class="controls">
-					<button data-play="basic">Play</button>
-					<button data-stop="basic">Stop</button>
-				</div>
-			</div>
-
-			<!-- 2. svg fill with hover + schedule (bravoecho flavor) -->
-			<div class="demo">
-				<h2>2. SVG fill — hover + auto-schedule</h2>
-				<p class="hint">
-					Hover the logo to play. Also auto-plays every 4–7 s.
-					<code>property: "fill"</code>.
-				</p>
-				<div class="stage">
-					<svg
-						id="svg-logo"
-						class="logo"
-						viewBox="0 0 144 40"
-						fill="currentColor"
+		<div class="head">
+			<div>
+				<h1>
+					<a href="https://github.com/marianmeres/kitt"
+						>@marianmeres/kitt </a
+					><small>— Knight Rider scanner, generalized</small>
+				</h1>
+				<p class="intro">
+					A tiny factory that animates a bright head with a trailing
+					gradient across any set of DOM elements. Built in the
+					<a href="https://jsr.io/@marianmeres/vanilla"
+						>@marianmeres/vanilla</a
 					>
-						<rect x="0" y="10" width="18" height="20" rx="2" />
-						<rect x="24" y="10" width="18" height="20" rx="2" />
-						<rect x="48" y="10" width="18" height="20" rx="2" />
-						<rect x="72" y="10" width="18" height="20" rx="2" />
-						<rect x="96" y="10" width="18" height="20" rx="2" />
-						<rect x="120" y="10" width="18" height="20" rx="2" />
-					</svg>
-				</div>
-				<div class="controls">
-					<button data-play="svg">Play</button>
-					<button data-stop="svg">Stop</button>
-				</div>
-			</div>
-
-			<!-- 3. background color, custom cyan trail, ltr only -->
-			<div class="demo">
-				<h2>3. Background — cyan trail, LTR only</h2>
-				<p class="hint">
-					<code>property: "backgroundColor"</code>,
-					<code>direction: "ltr"</code>, custom trail colors.
+					idiom and themed with
+					<a href="https://jsr.io/@marianmeres/design-tokens"
+						>@marianmeres/design-tokens</a
+					>.
 				</p>
-				<div class="stage">
-					<div class="boxes" id="boxes-cyan">
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-						<div class="cell"></div>
-					</div>
-				</div>
-				<div class="controls">
-					<button data-play="cyan">Play</button>
-					<button data-stop="cyan">Stop</button>
-				</div>
 			</div>
-
-			<!-- 4. opacity pulse, pingpong, infinite cycles -->
-			<div class="demo">
-				<h2>4. Opacity — infinite loop</h2>
-				<p class="hint">
-					<code>property: "opacity"</code>, numeric trail values,
-					<code>cycles: Infinity</code>.
-				</p>
-				<div class="stage">
-					<div class="dots" id="dots">
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-						<div class="dot"></div>
-					</div>
-				</div>
-				<div class="controls">
-					<button data-play="dots">Start loop</button>
-					<button data-stop="dots">Stop loop</button>
-				</div>
-			</div>
-
-			<!-- 5. backgroundColor, RTL direction, 3 cycles, slower interval -->
-			<div class="demo">
-				<h2>5. Equalizer bars — RTL, 3 cycles</h2>
-				<p class="hint">
-					<code>direction: "rtl"</code>, <code>cycles: 3</code>,
-					<code>interval: 40</code>, green trail.
-				</p>
-				<div class="stage">
-					<div class="bars" id="bars">
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-						<div class="bar"></div>
-					</div>
-				</div>
-				<div class="controls">
-					<button data-play="bars">Play</button>
-					<button data-stop="bars">Stop</button>
-				</div>
-			</div>
-
-			<!-- 7. svg opacity on circles, infinite loop -->
-			<div class="demo">
-				<h2>7. SVG opacity — pulsing circles</h2>
-				<p class="hint">
-					<code>property: "opacity"</code> on SVG
-					<code>&lt;circle&gt;</code> elements,
-					<code>cycles: Infinity</code>.
-				</p>
-				<div class="stage">
-					<svg id="svg-wave" class="wave" viewBox="0 0 200 40">
-						<circle cx="10" cy="20" r="5" />
-						<circle cx="30" cy="20" r="5" />
-						<circle cx="50" cy="20" r="5" />
-						<circle cx="70" cy="20" r="5" />
-						<circle cx="90" cy="20" r="5" />
-						<circle cx="110" cy="20" r="5" />
-						<circle cx="130" cy="20" r="5" />
-						<circle cx="150" cy="20" r="5" />
-						<circle cx="170" cy="20" r="5" />
-						<circle cx="190" cy="20" r="5" />
-					</svg>
-				</div>
-				<div class="controls">
-					<button data-play="svgWave">Start loop</button>
-					<button data-stop="svgWave">Stop loop</button>
-				</div>
-			</div>
-
-			<!-- 6. click trigger + onTick callback -->
-			<div class="demo">
-				<h2>6. Click trigger + onTick callback</h2>
-				<p class="hint">
-					Click the word to play. Current head index is shown below.
-				</p>
-				<div class="stage">
-					<div class="word" id="word-click" style="cursor: pointer">
-						<span>C</span><span>L</span><span>I</span><span>C</span
-						><span>K</span>&nbsp;<span>M</span><span>E</span>
-					</div>
-				</div>
-				<div class="controls">
-					<span
-						id="click-readout"
-						style="color: var(--muted); font-size: 0.8rem"
-						>head: —</span
-					>
-				</div>
-			</div>
+			<button id="theme-toggle">theme</button>
 		</div>
 
-		<script type="module">
-			import { kitt } from "./dist/bundle.js";
+		<!-- App mount point. main.ts builds the grid and appends it here. -->
+		<div id="app"></div>
 
-			const instances = {};
+		<!-- ===================== TEMPLATES (HTML lives in HTML) ===================== -->
 
-			// 1. Basic
-			instances.basic = kitt({
-				target: "#word-basic",
-				itemSelector: "span",
-			});
+		<template id="tpl-grid">
+			<div class="grid"></div>
+		</template>
 
-			// 2. SVG with hover + schedule
-			instances.svg = kitt({
-				target: "#svg-logo",
-				itemSelector: "rect",
-				property: "fill",
-				baseValue: "currentColor",
-				triggers: ["hover"],
-				schedule: {
-					initialDelay: 1500,
-					interval: [4000, 7000],
-					repeat: true,
-				},
-			});
+		<!-- One reusable card. data-ref = slots/holes; data-on = delegated actions. -->
+		<template id="tpl-card">
+			<div class="demo">
+				<h2 data-ref="title"></h2>
+				<p class="hint" data-ref="hint"></p>
+				<div class="stage" data-ref="stage"></div>
+				<div class="controls" data-ref="controls">
+					<button data-on="click:play">Play</button>
+					<button data-on="click:stop">Stop</button>
+				</div>
+				<div class="controls">
+					<span class="readout" data-ref="readout">head: —</span>
+				</div>
+			</div>
+		</template>
 
-			// 3. Cyan LTR
-			instances.cyan = kitt({
-				target: "#boxes-cyan",
-				itemSelector: ".cell",
-				property: "backgroundColor",
-				baseValue: "#222",
-				direction: "ltr",
-				trail: [
-					"rgb(0, 255, 255)",
-					"rgb(0, 204, 204)",
-					"rgb(0, 153, 153)",
-					"rgb(0, 102, 102)",
-					"rgb(0, 51, 51)",
-				],
-			});
+		<!-- Per-demo stage content: the actual elements each scanner animates. -->
+		<template id="tpl-stage-knight">
+			<div class="word">
+				<span>K</span><span>N</span><span>I</span><span>G</span><span
+					>H</span
+				><span>T</span>&nbsp;<span>R</span><span>I</span><span>D</span
+				><span>E</span><span>R</span>
+			</div>
+		</template>
 
-			// 4. Opacity infinite loop
-			instances.dots = kitt({
-				target: "#dots",
-				itemSelector: ".dot",
-				property: "opacity",
-				baseValue: "0.1",
-				trail: ["1", "0.8", "0.6", "0.4", "0.2"],
-				cycles: Infinity,
-				interval: 90,
-			});
+		<template id="tpl-stage-logo">
+			<svg class="logo" viewBox="0 0 144 40" fill="currentColor">
+				<rect x="0" y="10" width="18" height="20" rx="2" />
+				<rect x="24" y="10" width="18" height="20" rx="2" />
+				<rect x="48" y="10" width="18" height="20" rx="2" />
+				<rect x="72" y="10" width="18" height="20" rx="2" />
+				<rect x="96" y="10" width="18" height="20" rx="2" />
+				<rect x="120" y="10" width="18" height="20" rx="2" />
+			</svg>
+		</template>
 
-			// 5. RTL equalizer, 3 cycles
-			instances.bars = kitt({
-				target: "#bars",
-				itemSelector: ".bar",
-				property: "backgroundColor",
-				baseValue: "#222",
-				direction: "rtl",
-				cycles: 3,
-				interval: 40,
-				trail: [
-					"rgb(80, 255, 140)",
-					"rgb(64, 204, 112)",
-					"rgb(48, 153, 84)",
-					"rgb(32, 102, 56)",
-					"rgb(16, 51, 28)",
-				],
-			});
+		<template id="tpl-stage-boxes">
+			<div class="boxes">
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+				<div class="cell"></div>
+			</div>
+		</template>
 
-			// 7. SVG opacity on circles, infinite
-			instances.svgWave = kitt({
-				target: "#svg-wave",
-				itemSelector: "circle",
-				property: "opacity",
-				baseValue: "0.1",
-				trail: ["1", "0.8", "0.6", "0.4", "0.2"],
-				cycles: Infinity,
-				interval: 80,
-			});
+		<template id="tpl-stage-dots">
+			<div class="dots">
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+			</div>
+		</template>
 
-			// 6. Click trigger + onTick
-			const readout = document.getElementById("click-readout");
-			instances.click = kitt({
-				target: "#word-click",
-				itemSelector: "span",
-				triggers: ["click"],
-				trail: [
-					"rgb(255, 220, 0)",
-					"rgb(204, 176, 0)",
-					"rgb(153, 132, 0)",
-					"rgb(102, 88, 0)",
-					"rgb(51, 44, 0)",
-				],
-				onTick: (idx, phase) => {
-					readout.textContent = `head: ${idx} (${phase})`;
-				},
-				onEnd: () => {
-					readout.textContent = "head: —";
-				},
-			});
+		<template id="tpl-stage-bars">
+			<div class="bars">
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+				<div class="bar"></div>
+			</div>
+		</template>
 
-			// Wire Play/Stop buttons
-			for (const btn of document.querySelectorAll("[data-play]")) {
-				btn.addEventListener("click", () =>
-					instances[btn.dataset.play]?.play(),
-				);
-			}
-			for (const btn of document.querySelectorAll("[data-stop]")) {
-				btn.addEventListener("click", () =>
-					instances[btn.dataset.stop]?.stop(),
-				);
-			}
-		</script>
+		<template id="tpl-stage-wave">
+			<svg class="wave" viewBox="0 0 200 40">
+				<circle cx="10" cy="20" r="5" />
+				<circle cx="30" cy="20" r="5" />
+				<circle cx="50" cy="20" r="5" />
+				<circle cx="70" cy="20" r="5" />
+				<circle cx="90" cy="20" r="5" />
+				<circle cx="110" cy="20" r="5" />
+				<circle cx="130" cy="20" r="5" />
+				<circle cx="150" cy="20" r="5" />
+				<circle cx="170" cy="20" r="5" />
+				<circle cx="190" cy="20" r="5" />
+			</svg>
+		</template>
+
+		<template id="tpl-stage-click">
+			<div class="word" style="cursor: pointer">
+				<span>C</span><span>L</span><span>I</span><span>C</span><span
+					>K</span
+				>&nbsp;<span>M</span><span>E</span>
+			</div>
+		</template>
+
+		<!--
+			App logic, bundled from example/src/main.ts (imports kitt + vanilla).
+			Build it with:  deno task example:build   (or example:watch)
+		-->
+		<script type="module" src="./dist/bundle.js"></script>
 	</body>
 </html>

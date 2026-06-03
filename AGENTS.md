@@ -58,7 +58,12 @@ src/
 tests/
 └── kitt.test.ts     # FakeElement-based tests (no DOM shim)
 example/
-├── index.html       # Runnable demo gallery
+├── index.html       # Markup + <template>s + token-based styling
+├── theme.css        # Generated design tokens (deno task example:theme)
+├── gen-theme.ts     # Generates theme.css from src/theme.ts
+├── src/
+│   ├── main.ts      # App logic in the @marianmeres/vanilla idiom
+│   └── theme.ts     # @marianmeres/design-tokens ThemeSchema
 └── dist/bundle.js   # Built example (deno task example:build)
 scripts/
 └── build-npm.ts     # NPM build via @marianmeres/npmbuild

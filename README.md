@@ -163,11 +163,19 @@ Always call `destroy()` when removing the target from the DOM, especially when
 
 See [`example/index.html`](./example/index.html) for a runnable gallery
 covering text spans, SVG `<rect>` / `<circle>`, background-color cells, opacity
-dots, equalizer bars, hover/click triggers, and `onTick` readouts.
+dots, equalizer bars, hover/click triggers, and `onTick` readouts. The app is
+written in the [`@marianmeres/vanilla`](https://jsr.io/@marianmeres/vanilla)
+idiom (templates, reactive views, tracked cleanup — see
+[`example/src/main.ts`](./example/src/main.ts)) and themed with
+[`@marianmeres/design-tokens`](https://jsr.io/@marianmeres/design-tokens)
+(semantic `--app-color-*` variables in
+[`example/theme.css`](./example/theme.css), generated from
+[`example/src/theme.ts`](./example/src/theme.ts)).
 
 ```shell
-deno task example:watch
+deno task example:watch       # bundle example/src/main.ts → example/dist/bundle.js
 # then open example/index.html
+# deno task example:theme      # regenerate example/theme.css from the token schema
 ```
 
 ---
