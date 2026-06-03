@@ -15,11 +15,11 @@
     "rpm": "deno task release minor -y && deno task publish"
   },
   "imports": {
-    "@marianmeres/npmbuild": "jsr:@marianmeres/npmbuild@^1.13.0",
-    "@marianmeres/ticker": "jsr:@marianmeres/ticker@^1.17.0",
+    "@marianmeres/npmbuild": "jsr:@marianmeres/npmbuild@^1.16.0",
+    "@marianmeres/ticker": "jsr:@marianmeres/ticker@^1.17.1",
     "@std/assert": "jsr:@std/assert@^1.0.19",
-    "@std/fs": "jsr:@std/fs@^1.0.23",
-    "@std/path": "jsr:@std/path@^1.1.4"
+    "@std/fs": "jsr:@std/fs@^1.0.24",
+    "@std/path": "jsr:@std/path@^1.1.5"
   },
   "compilerOptions": {
     "lib": [
