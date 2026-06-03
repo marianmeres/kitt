@@ -5,7 +5,7 @@
  *   - HTML lives in HTML. Every bit of markup is a `<template>` in index.html;
  *     this module never builds DOM from strings — it clones via `fromTemplate`.
  *   - Components are factories returning views. `createDemoCard` is one reusable
- *     component; the gallery is data-driven (`DEMOS.map(... mount ...)`).
+ *     component; the gallery is data-driven (one `mount()` per `DEMOS` entry).
  *   - Everything cleans up. Each card ties the kitt scanner's `destroy()` into
  *     the view's `track()`, so tearing a view down stops its timers + listeners.
  *   - Explicit reactivity. The click demo feeds kitt's `onTick` into an
@@ -44,16 +44,18 @@ function gradient(token: string, steps = 5): string[] {
 	});
 }
 
+/** Numeric opacity trail (head fully opaque → fading tail) — theme-independent. */
+const OPACITY_TRAIL = ["1", "0.8", "0.6", "0.4", "0.2"];
+
 /* ---------------------------------------------------------------------------
  * The gallery data. One descriptor per demo card; `config` is the kitt options
  * minus `target` / `itemSelector` (those are wired by the card from the cloned
  * stage element). Every knob below — property, direction, cycles, interval,
- * triggers, schedule, trail — is plain kitt configuration.
+ * triggers, schedule, trail, overshoot — is plain kitt configuration.
  * ------------------------------------------------------------------------- */
 interface Demo {
-	id: string;
 	title: string;
-	/** Trusted HTML (our own copy) — bound via `html:` (innerHTML). */
+	/** Trusted HTML (our own copy) — written as innerHTML. */
 	hint: string;
 	/** `<template>` id for the elements the scanner animates. */
 	stage: string;
@@ -67,7 +69,6 @@ interface Demo {
 
 const DEMOS: Demo[] = [
 	{
-		id: "basic",
 		title: "1. Basic — color on text spans",
 		hint: `Default config: <code>property: "color"</code>, pingpong once.`,
 		stage: "tpl-stage-knight",
@@ -75,7 +76,6 @@ const DEMOS: Demo[] = [
 		config: { trail: gradient("--app-color-primary") },
 	},
 	{
-		id: "svg",
 		title: "2. SVG fill — hover + auto-schedule",
 		hint: `Hover the logo to play. Also auto-plays every 4–7&nbsp;s. ` +
 			`<code>property: "fill"</code>.`,
@@ -90,7 +90,6 @@ const DEMOS: Demo[] = [
 		},
 	},
 	{
-		id: "cyan",
 		title: "3. Background — accent trail, LTR only",
 		hint: `<code>property: "backgroundColor"</code>, ` +
 			`<code>direction: "ltr"</code>, accent (cyan) trail.`,
@@ -104,7 +103,6 @@ const DEMOS: Demo[] = [
 		},
 	},
 	{
-		id: "dots",
 		title: "4. Opacity — infinite loop",
 		hint: `<code>property: "opacity"</code>, numeric trail values, ` +
 			`<code>cycles: Infinity</code>.`,
@@ -113,13 +111,12 @@ const DEMOS: Demo[] = [
 		config: {
 			property: "opacity",
 			baseValue: "0.1",
-			trail: ["1", "0.8", "0.6", "0.4", "0.2"],
+			trail: OPACITY_TRAIL,
 			cycles: Infinity,
 			interval: 90,
 		},
 	},
 	{
-		id: "bars",
 		title: "5. Equalizer bars — RTL, 3 cycles",
 		hint: `<code>direction: "rtl"</code>, <code>cycles: 3</code>, ` +
 			`<code>interval: 40</code>, success (green) trail.`,
@@ -135,7 +132,6 @@ const DEMOS: Demo[] = [
 		},
 	},
 	{
-		id: "svgWave",
 		title: "7. SVG opacity — pulsing circles",
 		hint: `<code>property: "opacity"</code> on SVG <code>&lt;circle&gt;</code> ` +
 			`elements, <code>cycles: Infinity</code>.`,
@@ -144,13 +140,12 @@ const DEMOS: Demo[] = [
 		config: {
 			property: "opacity",
 			baseValue: "0.1",
-			trail: ["1", "0.8", "0.6", "0.4", "0.2"],
+			trail: OPACITY_TRAIL,
 			cycles: Infinity,
 			interval: 80,
 		},
 	},
 	{
-		id: "click",
 		title: "6. Click trigger + onTick callback",
 		hint: `Click the word to play. The current head index is shown below.`,
 		stage: "tpl-stage-click",
@@ -163,7 +158,6 @@ const DEMOS: Demo[] = [
 		},
 	},
 	{
-		id: "overshoot",
 		title: "8. Edge mode — overshoot (default)",
 		hint: `<code>overshoot: true</code> (default). Watch the ends: the head ` +
 			`sails one trail-length past each edge and fades back, so both ` +
@@ -179,7 +173,6 @@ const DEMOS: Demo[] = [
 		},
 	},
 	{
-		id: "wall",
 		title: "9. Edge mode — wall bounce",
 		hint: `<code>overshoot: false</code>. The head reverses exactly at each ` +
 			`wall at full brightness — the classic KITT bounce. Same config as ` +
@@ -205,29 +198,37 @@ function createDemoCard({ demo }: { demo: Demo }): ViewInstance {
 		const el = fromTemplate("tpl-card");
 		const r = refs(el);
 
-		// Card chrome: one-directional data → DOM. `hint` is our own trusted
-		// markup, so it goes through the `html:` (innerHTML) binding.
-		(r.title as HTMLElement).textContent = demo.title;
-		(r.hint as HTMLElement).innerHTML = demo.hint;
+		// Card chrome (one-directional data → DOM). `hint` is our own trusted
+		// markup, so it is written as innerHTML.
+		r.title.textContent = demo.title;
+		r.hint.innerHTML = demo.hint;
 
 		// The elements the scanner animates, cloned from this demo's stage template.
 		const stage = fromTemplate(demo.stage);
 		r.stage.appendChild(stage);
 
-		// A reactive head readout, fed by kitt's onTick (click demo only).
-		const head = observable("head: —");
+		// Optional reactive head readout (click demo only): kitt's onTick feeds an
+		// observable, the readout subscribes to it — co-located in one block.
+		let onTick: KittConfig["onTick"];
+		let onEnd: KittConfig["onEnd"];
+		if (demo.readout) {
+			const head = observable("head: —");
+			track(head.subscribe((txt) => (r.readout.textContent = txt)));
+			onTick = (idx, phase) => head.set(`head: ${idx} (${phase})`);
+			onEnd = () => head.set("head: —");
+		} else {
+			r.readout.remove();
+		}
 
-		// THE scanner. Target the cloned `stage` element (never a global
-		// selector) so duplicated demos can't collide. kitt owns the ticker,
-		// trigger listeners and any schedule timer; tying its destroy() into the
-		// view's track() means destroy() stops all of it.
+		// THE scanner. Target the cloned `stage` element (never a global selector)
+		// so duplicated demos can't collide. kitt owns the ticker, trigger
+		// listeners and any schedule timer; tracking its destroy() means the
+		// view's destroy() stops all of it.
 		const scanner = kitt({
 			target: stage,
 			itemSelector: demo.itemSelector,
-			onTick: demo.readout
-				? (idx, phase) => head.set(`head: ${idx} (${phase})`)
-				: undefined,
-			onEnd: demo.readout ? () => head.set("head: —") : undefined,
+			onTick,
+			onEnd,
 			...demo.config,
 		});
 		track(scanner.destroy);
@@ -242,12 +243,6 @@ function createDemoCard({ demo }: { demo: Demo }): ViewInstance {
 
 		if (demo.noControls) r.controls.remove();
 
-		if (demo.readout) {
-			track(head.subscribe((txt) => (r.readout.textContent = txt)));
-		} else {
-			r.readout.remove();
-		}
-
 		return { el };
 	});
 }
@@ -259,7 +254,7 @@ function createDemoCard({ demo }: { demo: Demo }): ViewInstance {
  * ------------------------------------------------------------------------- */
 const app = createView((track) => {
 	// The cloned template root IS the grid container, so cards mount into `el`
-	// directly. (refs() only collects descendants, never the root itself.)
+	// directly — no ref needed.
 	const el = fromTemplate("tpl-grid");
 	for (const demo of DEMOS) mount(track, el, createDemoCard, { demo });
 	return { el };
