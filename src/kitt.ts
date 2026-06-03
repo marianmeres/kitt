@@ -55,6 +55,18 @@ export interface KittConfig {
 	trail?: string[];
 	/** Sweep direction. Defaults to `"pingpong"`. */
 	direction?: KittDirection;
+	/**
+	 * Pingpong edge behavior. Only applies when `direction` is `"pingpong"`
+	 * (ignored for `"ltr"` / `"rtl"`, which always slide off their far edge).
+	 * - `true` (default): the head overshoots each wall by `tailLength`, so the
+	 *   glow slides on and off both edges symmetrically — neither wall snaps at
+	 *   full brightness.
+	 * - `false`: the head reverses exactly at each wall (a hard "bounce" at full
+	 *   brightness), with a one-time slide-in at the start and slide-off at the
+	 *   end of a finite run. This is the classic KITT look.
+	 * Defaults to true.
+	 */
+	overshoot?: boolean;
 	/** Full passes per `play()` call. Use `Infinity` to loop until stopped. Defaults to 1. */
 	cycles?: number;
 	/** Call `play()` on creation. Defaults to false. */
@@ -165,11 +177,29 @@ function setStyle(el: HTMLElement, property: string, value: string) {
 
 type Frame = [number, number];
 
-// One pingpong "bounce": ltr sweep 0..length-1, then rtl sweep length-2..1.
-// Head pauses for a single frame at each edge; the next frame bounces back.
-// When concatenated, edge cells (0 and length-1) are visited exactly once
-// per direction reversal, producing the perceived bounce.
-function buildBounce(length: number): Frame[] {
+// One pingpong "bounce", overshooting each wall by `tailLength`. The head runs
+// from the off-screen-left turning point (-tailLength) out to the off-screen-
+// right one (length-1+tailLength), then reverses back to just past the left
+// turn. Because it travels `tailLength` beyond each real edge, every edge cell
+// fades the full length of the trail and back instead of snapping at full
+// brightness — both walls behave identically, and the slide-on/slide-off is
+// intrinsic (no separate intro/outro needed). Each turning point is visited
+// exactly once; concatenating bounces yields a seamless `… L+1, L, L+1 …`
+// reversal at the left that mirrors the explicit reversal at the right.
+function buildBounceOvershoot(length: number, tailLength: number): Frame[] {
+	const lo = -tailLength;
+	const hi = length - 1 + tailLength;
+	const seq: Frame[] = [];
+	for (let i = lo; i <= hi; i++) seq.push([i, -1]);
+	for (let i = hi - 1; i >= lo + 1; i--) seq.push([i, 1]);
+	return seq;
+}
+
+// One "wall" pingpong bounce: ltr sweep 0..length-1, then rtl sweep length-2..1.
+// The head reverses exactly at each edge, so edge cells hit full brightness and
+// snap back. Used with buildSlideIn/buildSlideOff, which slide the glow on at
+// the start and off at the end of a finite run (this is the pre-overshoot look).
+function buildBounceWall(length: number): Frame[] {
 	const seq: Frame[] = [];
 	for (let i = 0; i < length; i++) seq.push([i, -1]);
 	for (let i = length - 2; i >= 1; i--) seq.push([i, 1]);
@@ -221,6 +251,7 @@ export function kitt(config: KittConfig): KittHandle {
 		baseValue = "inherit",
 		trail = DEFAULT_TRAIL,
 		direction = "pingpong",
+		overshoot = true,
 		cycles = 1,
 		autoStart = false,
 		schedule,
@@ -239,25 +270,24 @@ export function kitt(config: KittConfig): KittHandle {
 	const container = resolveContainer(target);
 	const prev: string[] = new Array(els.length).fill(baseValue);
 
-	// Build the three sequence pieces once. `loopBody` is what repeats; `intro`
-	// and `outro` are played once per `play()` to slide the glow on/off the edges.
-	let intro: Frame[];
+	// Build the sequence pieces once. `loopBody` is what repeats; `intro`/`outro`
+	// (only used by pingpong wall mode) are played once per `play()` to slide the
+	// glow on at the start and off at the end. Overshoot pingpong and the one-way
+	// ltr/rtl sweeps carry their slide-on/off intrinsically, so they leave
+	// intro/outro empty.
+	let intro: Frame[] = [];
+	let outro: Frame[] = [];
 	let loopBody: Frame[];
-	let outro: Frame[];
 	if (direction === "pingpong") {
-		intro = buildSlideIn(tailLength);
-		loopBody = buildBounce(els.length);
-		outro = buildSlideOff(tailLength);
+		if (overshoot) {
+			loopBody = buildBounceOvershoot(els.length, tailLength);
+		} else {
+			intro = buildSlideIn(tailLength);
+			loopBody = buildBounceWall(els.length);
+			outro = buildSlideOff(tailLength);
+		}
 	} else {
-		// Single-direction sweeps already include their own slide-in and slide-off,
-		// so the whole sweep IS the loop body. No separate intro/outro needed.
-		intro = [];
-		loopBody = buildOneWay(
-			els.length,
-			tailLength,
-			direction === "ltr" ? -1 : 1,
-		);
-		outro = [];
+		loopBody = buildOneWay(els.length, tailLength, direction === "ltr" ? -1 : 1);
 	}
 
 	let sequence: Frame[] = [];

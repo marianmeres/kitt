@@ -162,6 +162,39 @@ const DEMOS: Demo[] = [
 			trail: gradient("--app-color-warning"),
 		},
 	},
+	{
+		id: "overshoot",
+		title: "8. Edge mode — overshoot (default)",
+		hint: `<code>overshoot: true</code> (default). Watch the ends: the head ` +
+			`sails one trail-length past each edge and fades back, so both ` +
+			`walls behave identically.`,
+		stage: "tpl-stage-boxes",
+		itemSelector: ".cell",
+		config: {
+			property: "backgroundColor",
+			baseValue: "var(--app-color-muted)",
+			cycles: Infinity,
+			interval: 60,
+			trail: gradient("--app-color-primary"),
+		},
+	},
+	{
+		id: "wall",
+		title: "9. Edge mode — wall bounce",
+		hint: `<code>overshoot: false</code>. The head reverses exactly at each ` +
+			`wall at full brightness — the classic KITT bounce. Same config as ` +
+			`#8 otherwise.`,
+		stage: "tpl-stage-boxes",
+		itemSelector: ".cell",
+		config: {
+			property: "backgroundColor",
+			baseValue: "var(--app-color-muted)",
+			overshoot: false,
+			cycles: Infinity,
+			interval: 60,
+			trail: gradient("--app-color-primary"),
+		},
+	},
 ];
 
 /* ---------------------------------------------------------------------------
