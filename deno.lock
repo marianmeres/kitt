@@ -11,7 +11,7 @@
     "jsr:@marianmeres/pubsub@3": "3.0.0",
     "jsr:@marianmeres/store@3": "3.0.1",
     "jsr:@marianmeres/ticker@^1.17.1": "1.17.1",
-    "jsr:@marianmeres/vanilla@^1.2.0": "1.2.0",
+    "jsr:@marianmeres/vanilla@^1.6.0": "1.6.0",
     "jsr:@std/assert@0.223": "0.223.0",
     "jsr:@std/assert@^1.0.19": "1.0.19",
     "jsr:@std/bytes@0.223": "0.223.0",
@@ -100,8 +100,8 @@
         "jsr:@marianmeres/store"
       ]
     },
-    "@marianmeres/vanilla@1.2.0": {
-      "integrity": "c357cc8e745882b267f275812736dcc6589785a55f3bfe03915dec5170b06bb3"
+    "@marianmeres/vanilla@1.6.0": {
+      "integrity": "4203f1a2e9dcaf7aec910bf334537851b7dfdaaa0daf5e4b694daa9a33b6178f"
     },
     "@std/assert@0.223.0": {
       "integrity": "eb8d6d879d76e1cc431205bd346ed4d88dc051c6366365b1af47034b0670be24"
@@ -327,7 +327,7 @@
       "jsr:@marianmeres/design-tokens@^1.8.0",
       "jsr:@marianmeres/npmbuild@^1.16.0",
       "jsr:@marianmeres/ticker@^1.17.1",
-      "jsr:@marianmeres/vanilla@^1.2.0",
+      "jsr:@marianmeres/vanilla@^1.6.0",
       "jsr:@std/assert@^1.0.19",
       "jsr:@std/fs@^1.0.24",
       "jsr:@std/path@^1.1.5"
